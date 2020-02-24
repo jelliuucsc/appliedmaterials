@@ -70,6 +70,6 @@ export class GithubRepoService {
       })
     };
     return this.http.post("http://localhost:8080/removeBookmark", repository,{withCredentials:true})
-          .pipe(map((data: any) => <Repository[]>data));
+          .pipe(map((data: any) => {this.bookmarkList.next(<Repository[]>data); return <Repository[]>data}));
   }
 }
