@@ -1,0 +1,29 @@
+<div class="container">
+    <div class="row" style="padding-top: 20px;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Avatar</td>
+                    <td>User</td>
+                    <td>Repository Name</td>
+                    <td><div style="padding-left:50px;">Link</div></td>
+                    <td>Bookmark</td>
+                </tr>   
+            </thead>
+            <tbody>
+                <tr *ngFor="let bookmark of bookmarks;">
+                    <td><img src={{bookmark.owner.avatar_url}} style="width:100px; height:100px;margin:auto"></td>
+                    <td><div style="padding-top:40px">{{bookmark.owner.login}}</div></td>
+                    <td><div style="padding-top:40px">{{bookmark.name}}</div></td>
+                    <td><div style="padding-top:40px">{{bookmark.html_url}}</div></td>
+                    <td>
+                        <div style="padding-top:40px">
+                            <button class="btn btn-info" (click)="setBookmark(bookmark, 'remove')"> Remove</button>
+                        </div>
+                    
+                    </td>     
+                </tr>
+            </tbody>
+        </table>    
+    </div>    
+</div>

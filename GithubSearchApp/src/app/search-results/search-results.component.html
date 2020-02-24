@@ -1,0 +1,50 @@
+<div class="container">
+    <div class="row" style="padding-top: 20px;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Avatar</td>
+                    <td>User</td>
+                    <td>Repository Name</td>
+                    <td><div style="padding-left:50px;">Link</div></td>
+                    <td>Bookmark</td>
+                </tr>   
+            </thead>
+            <tbody>
+                <tr *ngFor="let repo of repositories; let i = index" [ngStyle]="{'background-color': repo.bookmarked == true ? '#ccdade87' : ''}">
+                    <td><img src={{repo.owner.avatar_url}} style="width:100px; height:100px;margin:auto"></td>
+                    <td><div style="padding-top:40px">{{repo.owner.login}}</div></td>
+                    <td><div style="padding-top:40px">{{repo.name}}</div></td>
+                    <td><div style="padding-top:40px">{{repo.html_url}}</div></td>
+                    <td>
+                        <div *ngIf="!repo.bookmarked; else removeBookmark" style="padding-top:40px">
+                            <button class="btn btn-info" (click)="setBookmark(repo, 'add')"> Add</button>
+                            </div>
+                        <ng-template #removeBookmark >
+                            <div style="padding-top:40px" >
+                                <button class="btn btn-info" (click)="setBookmark(repo,'remove')">Remove</button>
+                            </div>    
+                        </ng-template>
+                    </td>     
+                </tr>
+            </tbody>
+        </table>    
+    </div>  
+    <div class="row">
+        <ng-template [ngIf]="pageNumber == undefined">             
+        </ng-template>
+        <ng-template [ngIf]="pageNumber == 1">         
+            <div class="col-sm-4 offset-5" style="padding-bottom:40px; padding-left: 40px;">
+                <button class="btn btn-info" (click) ="getPage('next')">Next</button>
+            </div>       
+        </ng-template>
+        <ng-template [ngIf]="pageNumber > 1">         
+            <div class="col-sm-2 offset-4" style="padding-bottom:40px; padding-left: 60px;">
+                <button class="btn btn-info" (click) ="getPage('prev')">Prev</button>
+            </div>    
+            <div class="col-sm-2" style="padding-bottom:40px; padding-left: 60px;">
+                <button class="btn btn-info" (click) ="getPage('next')">Next</button>
+            </div>      
+        </ng-template>
+    </div>  
+</div>
