@@ -8,17 +8,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GithubRepositoryResults {
 	@JsonProperty("items")
-	private List<GithubAccounts> githubAccounts;
+	private List<GithubAccount> githubAccounts;
 	
 	public GithubRepositoryResults() {
 		
 	}
 
-	public List<GithubAccounts> getGithubAccount() {
+	public List<GithubAccount> getGithubAccount() {
 		return githubAccounts;
 	}
 
-	public void setGithubAccount(List<GithubAccounts> githubAccounts) {
+	public void setGithubAccount(List<GithubAccount> githubAccounts) {
 		this.githubAccounts = githubAccounts;
 	}
 	

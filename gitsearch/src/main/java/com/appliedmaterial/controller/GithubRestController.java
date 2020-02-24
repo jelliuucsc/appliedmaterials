@@ -22,80 +22,83 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.appliedmaterial.model.GithubAccounts;
+import com.appliedmaterial.model.GithubAccount;
 import com.appliedmaterial.model.GithubRepositoryResults;
 
 @RestController
 public class GithubRestController {
 	@Autowired
 	RestTemplate restTemplate;
-	
+
 	final static Logger logger = LogManager.getLogger(GithubRestController.class);
-	
+	private static final String SESSION_BOOKMARKS = "SESSION_BOOKMARKS";
+	private static final String SESSION_SEARCH_RESULT = "SESSION_SEARCH_RESULT";
+
 	@CrossOrigin(origins = "http://localhost:4200")
-	@GetMapping("/search/{query}")
-	public GithubRepositoryResults getSearchResult(HttpServletRequest request, @PathVariable("query") String query) {
+	@GetMapping("/search/{query}/{pageNumber}")
+	public GithubRepositoryResults getSearchResult(HttpServletRequest request, @PathVariable("query") String query, @PathVariable("pageNumber") String pageNumber) {
 		HttpHeaders headers = new HttpHeaders();
 		HttpSession session = request.getSession();
-//		System.out.println(session.getId());
+		logger.debug(session.getId());
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		HttpEntity<GithubRepositoryResults> entity = new HttpEntity<GithubRepositoryResults>(headers);
-		GithubRepositoryResults gh = restTemplate.exchange("https://api.github.com/search/repositories?q=" + query + "+language:javascript&per_page=10", HttpMethod.GET, entity, GithubRepositoryResults.class).getBody();
-		Set<GithubAccounts> urls = (Set<GithubAccounts>)session.getAttribute("BOOKMARKS");
+		GithubRepositoryResults gh = restTemplate
+				.exchange(
+						"https://api.github.com/search/repositories?q=" + query
+								+ "+language:javascript&per_page=10&page=" + pageNumber,
+						HttpMethod.GET, entity, GithubRepositoryResults.class)
+				.getBody();
+
+		@SuppressWarnings("unchecked")
+		Set<GithubAccount> urls = (Set<GithubAccount>) session.getAttribute(SESSION_BOOKMARKS);
+
 		if (urls == null) {
-			urls = new HashSet<GithubAccounts>();
-			session.setAttribute("BOOKMARKS", urls);
-			session.setAttribute("searchResults", gh.getGithubAccount());
+			urls = new HashSet<GithubAccount>();
+			session.setAttribute(SESSION_BOOKMARKS, urls);
+			session.setAttribute(SESSION_SEARCH_RESULT, gh.getGithubAccount());
 			return gh;
-		}
-		else {
-			for(int i = 0 ; i < gh.getGithubAccount().size(); i++) {
-				if(urls.contains(gh.getGithubAccount().get(i))) {
+		} else {
+			for (int i = 0; i < gh.getGithubAccount().size(); i++) {
+				if (urls.contains(gh.getGithubAccount().get(i))) {
 					gh.getGithubAccount().get(i).setBookmarked(true);
 				}
 			}
-			session.setAttribute("searchResults", gh.getGithubAccount());
+			session.setAttribute(SESSION_SEARCH_RESULT, gh.getGithubAccount());
 			return gh;
 		}
 	}
-	
+
 	@CrossOrigin(origins = "http://localhost:4200")
-	@PostMapping ("/addBookmark/{isBookmarked}")
-	public Set<GithubAccounts>addUrl(HttpServletRequest request, @RequestBody GithubAccounts account, @PathVariable("isBookmarked") String isBookmarked) {
+	@PostMapping("/addBookmark")
+	public Set<GithubAccount> addUrl(HttpServletRequest request, @RequestBody GithubAccount account) {
 		HttpSession session = request.getSession();
-//		System.out.println(session.getId());
-//		System.out.println(account.getRepoName());
-		Set<GithubAccounts> urls = (Set<GithubAccounts>)session.getAttribute("BOOKMARKS");
-		if(isBookmarked.equals("add")){
-			logger.info("Added Bookmark Url:" + account.getRepoUrl());
-			urls.add(account);	
-		} else {
-			urls.remove(account);
-			logger.info("Removed Bookmark Url:" + account.getRepoUrl());
-//			session.setAttribute("BOOKMARKS", urls);
-		}
-		System.out.println(urls);
-		return (Set<GithubAccounts>) session.getAttribute("BOOKMARKS");
+
+		logger.debug(session.getId());
+		logger.debug(account.getRepoName());
+
+		@SuppressWarnings("unchecked")
+		Set<GithubAccount> urls = (Set<GithubAccount>) session.getAttribute(SESSION_BOOKMARKS);
+
+		logger.info("Added Bookmark Url:" + account.getRepoUrl());
+		urls.add(account);
+
+		return urls;
 	}
-	
-	
-//	@CrossOrigin(origins = "http://localhost:4200")
-//	@GetMapping ("/ok")
-//	public Set<String> getOk(){
-//		Set<String> a = new HashSet<>();
-//		a.add("a");
-//		a.add("b");
-//		return a;
-//	}
-//	@CrossOrigin(origins = "http://localhost:4200")
-//	@GetMapping ("/getBookmarks")
-//	public void getBookmarks(HttpServletRequest request) {
-//		System.out.println("In getBookmarks");
-//		HttpSession session = request.getSession();
-//		System.out.println(session.getId());
-//		List<String> urls = (List<String>) session.getAttribute("BOOKMARKS");
-//		for(String s:urls) {
-//			System.out.println(s);
-//		}
-//	}
+
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping("/removeBookmark")
+	public Set<GithubAccount> removeUrl(HttpServletRequest request, @RequestBody GithubAccount account) {
+		HttpSession session = request.getSession();
+
+		logger.debug(session.getId());
+		logger.debug(account.getRepoName());
+
+		@SuppressWarnings("unchecked")
+		Set<GithubAccount> urls = (Set<GithubAccount>) session.getAttribute(SESSION_BOOKMARKS);
+
+		urls.remove(account);
+		logger.info("Removed Bookmark Url:" + account.getRepoUrl());
+
+		return urls;
+	}
 }
